@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <main class="container">
+    <h1 class="h3 my-4">Корзина</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          <div class="alert alert-warning" role="alert">
+            {% for message in messages %}
+              {{ message }}<br>
+            {% endfor %}
+          </div>    
+        {% endif %}
+    {% endwith %}
+
+    {% if not current_user.is_authenticated %}
+    <div class="alert alert-warning" role="alert">
+      Чтобы сделать заказ – <a href="{{ url_for('login')}}">войдите</a> или <a href="{{ url_for('registration')}}">зарегистрируйтесь</a>
+    </div>
+    {% endif %}
+    <div class="row mt-5">
+        <div class="col-4">
+          <form action="{{ url_for('ordered', order_sum=session.cart|sum(attribute='price')) }}" method="POST">
+          <h4 class="">Ваши данные</h4>
+          {{ form.hidden_tag() }}
+          <div class=" md-4 order-md-1">
+            <div class="mt-3 mb-3">
+              {{ form.name.label }}
+              {{ form.name(class="font-weight-bold form-control") }}
+            </div>
+          </div>
+          <div class=" md-4 order-md-1">
+            <div class="mt-3 mb-3">
+              {{ form.address.label }}
+              {{ form.address(class="font-weight-bold form-control") }}
+            </div>
+          </div>
+          <div class="md-4 form-label-group">
+            {{ form.mail.label }}
+            {{ form.mail(class="font-weight-bold form-control") }}
+          </div>
+          <div class=" md-4 order-md-1">
+            <div class="mt-3 mb-3">
+              {{ form.phone.label }}
+              {{ form.phone(class="font-weight-bold form-control") }}
+            </div>
+          {% if current_user.is_authenticated and session.cart|length() != 0 %}
+            {{ form.submit(class="mt-3 mb-5 btn btn-danger") }}
+          {% endif %}
+          </form>
+        </div>
+          
+    </div>
+      <div class="col-1"></div>
+      <div class="col-7">
+        {% if session.cart %}
+          <h4 class="mb-3 col-7 mb-5">{{ session.cart|length() }} блюда в корзине</h4>
+          <table class="table">
+            <tbody>
+              {% for element in cart_session %}              
+              <tr>
+                <th scope="row">{{ element.title }}</th>
+                <td></td>
+                <td>1</td>
+                <td>{{ element.price }}</td>
+                <td><a class="text-danger" href="{{ url_for('del_from_cart', id=element.id) }}">Удалить</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <hr>
+          <p class="display-4 my-2 ">{{ session.cart|sum(attribute='price') }} руб</p>
+        {% else %}
+          <h4 class="mb-3 col-7 mb-5">Корзина пуста</h4>    
+        {% endif %}
+      </div>
+    </div>
+  </main>
+
+  {% endblock %}
